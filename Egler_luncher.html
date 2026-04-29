@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'><rect width='16' height='16' fill='%23795548'/><rect width='16' height='6' fill='%238BC34A'/><rect y='6' width='16' height='2' fill='%237CB342'/></svg>">
+    <title>Eagler Launcher</title>
+    <style>
+@media (max-height: 600px) {
+    .launcher-card { transform: scale(0.8); margin: 10px; }
+}
+
+.news-section {
+    margin-top: 30px;
+    max-width: 600px;
+}
+
+.news-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #888;
+    letter-spacing: 1px;
+}
+
+.news-line {
+    flex: 1;
+    height: 1px;
+    background: #333;
+}
+
+.news-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #222;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: 0.2s;
+}
+
+.news-card:hover {
+    border-color: #444;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.news-tag {
+    font-size: 10px;
+    background: #444;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 8px;
+    text-transform: uppercase;
+}
+
+.news-title {
+    font-weight: bold;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.news-body {
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.4;
+}
+
+        .page {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    position: relative; /* ADD THIS LINE */
+    overflow: hidden;
+}
+
+.friends-list {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 220px;
+    /* Height stops exactly at the top of the green Play bar */
+    height: calc(100% - 110px); 
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border-left: 1px solid var(--border);
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 5;
+}
+
+
+        .friends-list {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 200px;
+    height: calc(100% - 110px); /* Stays above the bottom bar */
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(5px);
+    border-left: 1px solid var(--border);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.friend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.friend-avatar {
+    width: 32px;
+    height: 32px;
+    background-color: #222;
+    background-size: cover;
+    border-radius: 4px;
+    image-rendering: pixelated;
+}
+
+.friend-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.friend-name {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.friend-status {
+    font-size: 10px;
+    color: var(--accent);
+}
+
+        :root {
+            --bg-dark: #121212;
+            --bg-panel: #1e1e1e;
+            --accent: #3fb54e;
+            --accent-hover: #4cc95c;
+            --border: #333;
+            --text-main: #ffffff;
+            --text-dim: #aaaaaa;
+        }
+
+        body.theme-blue { --accent: #007bff; --accent-hover: #0056b3; }
+        body.theme-red { --accent: #ff4444; --accent-hover: #cc0000; }
+        body.theme-purple { --accent: #b388ff; --accent-hover: #7c4dff; }
+
+        body {
+            background-color: #000;
+            color: var(--text-main);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 70px;
+            background-color: #0a0a0a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 0;
+            border-right: 1px solid var(--border);
+            z-index: 10;
+        }
+
+        .nav-item {
+            width: 45px;
+            height: 45px;
+            background: #222;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid transparent;
+            font-size: 20px;
+            transition: 0.2s;
+        }
+
+        .nav-item.active { border-color: var(--accent); background: #333; }
+
+        /* Background & Pages */
+        #bgOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(18,18,18,1)), 
+                              url('https://images.unsplash.com/photo-1627398242454-45a1465c2479?q=80&w=1500&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            transition: 0.5s;
+        }
+
+        .page { display: none; flex: 1; flex-direction: column; z-index: 1; }
+        .page.active { display: flex; }
+        .container { padding: 60px 40px; flex: 1; }
+
+        /* Settings Grid */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 800px;
+            background: rgba(0,0,0,0.8);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .setting-item { display: flex; flex-direction: column; gap: 8px; }
+        label { font-size: 14px; color: var(--text-dim); font-weight: bold; }
+        
+        input[type="text"], select, .file-input-label {
+            padding: 12px;
+            background: #111;
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Action Bar */
+        .action-bar {
+            background-color: var(--bg-panel);
+            height: 110px;
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            border-top: 1px solid var(--border);
+            gap: 20px;
+        }
+
+      .play-button {
+    background-color: var(--accent);
+    color: white;
+    font-size: 1.8rem;
+    font-weight: 800;
+    padding: 12px 70px;
+    border-radius: 4px;
+    box-shadow: 0 4px 0 #00000044;
+    transition: 0.1s;
+    border: none; /* Add this for buttons */
+    cursor: pointer; /* Add this for buttons */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+}
+
+        .play-button:hover { background-color: var(--accent-hover); transform: translateY(-2px); }
+        .play-button:active { transform: translateY(2px); box-shadow: none; }
+
+        /* User & Skin Display */
+        .user-display { margin-left: auto; text-align: right; display: flex; align-items: center; gap: 15px; }
+      .avatar-box { 
+    width: 50px; 
+    height: 50px; 
+    background: #333; 
+    border-radius: 4px; 
+    border: 2px solid var(--accent);
+    
+    /* These three are the secret sauce */
+    background-size: 800%; /* Zooms into the skin map */
+    background-position: 10% 10%; /* Focuses on the face area */
+    image-rendering: pixelated; 
+}
+        
+    </style>
+</head>
+<body id="mainBody">
+
+    <div id="bgOverlay"></div>
+
+    <nav class="sidebar">
+        <div class="nav-item active" onclick="showPage('home', this)">🏠</div>
+        <div class="nav-item" onclick="showPage('settings', this)">⚙️</div>
+        <div class="nav-item" onclick="window.open('https://mupoki.github.io', '_blank')">🌐</div>
+    </nav>
+
+    <div id="home" class="page active">
+       
+
+        <div class="friends-list">
+    <h3 style="font-size: 12px; color: var(--text-dim); margin-bottom: 15px;">FRIENDS</h3>
+    <div class="friend-item">
+        <div class="friend-avatar" style="background-image: url('https://minotar.net/helm/Steve/32.png')"></div>
+        <div class="friend-info">
+            <div class="friend-name">Notch</div>
+            <div class="friend-status">Playing 1.12.2</div>
+        </div>
+    </div>
+    <div class="friend-item">
+        <div class="friend-avatar" style="background-image: url('https://minotar.net/helm/Alex/32.png')"></div>
+        <div class="friend-info">
+            <div class="friend-name">Grumm</div>
+            <div class="friend-status" style="color: #888;">AFK</div>
+        </div>
+    </div>
+    <div class="friend-item" id="playerFriendItem" style="border-top: 1px solid #333; padding-top: 10px; margin-top: 10px;">
+        <div class="friend-avatar" id="friendSelfAvatar"></div>
+        <div class="friend-info">
+            <div class="friend-name" id="friendSelfName">You</div>
+            <div class="friend-status" id="friendSelfStatus">Online</div>
+        </div>
+    </div>
+
+<p>                       
+  need mods? theres a Mod Floder inside of the zip file that your ran this from
+
+</p>
+</div>
+
+        <div class="container">
+            <span id="versionBadge" style="background: var(--accent); color: #000; padding: 2px 8px; font-weight: bold; border-radius: 4px; font-size: 12px;">1.12.2</span>
+            <h1 style="font-size: 4.5rem; margin: 10px 0; text-shadow: 0 10px 20px rgba(0,0,0,0.5);">Eagler Launcher</h1>
+            <p style="font-size: 1.2rem;">Welcome back, <span id="welcomeName" style="color: var(--accent); font-weight: bold;">Player</span>.</p>
+            <div id="playtimeDisplay" style="font-size: 10px; color: var(--gemini-purple); opacity: 0.8; margin-top: 2px;">
+    0m played
+</div>
+        </div>
+        
+        <div class="action-bar">
+            <div style="background: #252525; padding: 10px 15px; border-radius: 6px; border: 1px solid var(--border); min-width: 200px;">
+                <label>VERSION</label>
+             <select id="versionSelect" class="minimal-select">
+    <option value="1.12.2">Minecraft 1.12.2</option>
+    <option value="1.8.8">Minecraft 1.8.8</option>
+    <option value="1.20 (WASM)">Minecraft 1.20 (WASM)</option>
+</select>
+            </div>
+
+            <button onclick="launchGame()" id="playBtn" class="play-button">PLAY</button>
+
+            <div class="user-display">
+                <div>
+                    <div id="displayUser" style="font-weight: bold;">Player</div>
+                    <div id="statusIndicator" style="font-size: 11px; color: var(--accent);">● ONLINE</div>
+                </div>
+                <div id="skinPreview" class="avatar-box"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings" class="page">
+
+        
+        <div class="container">
+            <h1>Launcher Settings</h1>
+            <div class="settings-grid">
+                <div class="setting-item">
+                    <label>Player Username</label>
+                    <input type="text" id="usernameInput" placeholder="Enter username..." oninput="saveUsername(this.value)">
+                </div>
+                <div class="setting-item">
+                    <label>Interface Theme</label>
+                    <select id="themeSelect" onchange="saveTheme(this.value)">
+                        <option value="default">Classic Green</option>
+                        <option value="theme-blue">Deep Sea Blue</option>
+                        <option value="theme-red">Nether Wastes Red</option>
+                        <option value="theme-purple">End Void Purple</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>Custom Background</label>
+                    <input type="file" id="bgUpload" accept="image/*" style="display:none" onchange="handleBgUpload(this)">
+                    <div class="file-input-label" onclick="document.getElementById('bgUpload').click()">📁 Upload Image</div>
+                </div>
+                <div class="setting-item">
+                    <label>Character Skin (.png)</label>
+                    <input type="file" id="skinUpload" accept="image/png" style="display:none" onchange="handleSkinUpload(this)">
+                    <div class="file-input-label" onclick="document.getElementById('skinUpload').click()">👤 Import Skin</div>
+                </div>
+                <div class="setting-item">
+    <button onclick="cloakLauncher()" style="background: #333; color: white; border: 1px solid #555; padding: 10px; cursor: pointer; border-radius: 5px; width: 100%;">
+        Launch in about:blank (Cloak Mode)
+    </button>
+    <p style="font-size: 10px; color: #888; margin-top: 5px;">
+        *Hides the launcher in your browser history and tab name.
+    </p>
+</div>
+            </div>
+            <button onclick="resetAssets()" style="margin-top:20px; background:none; border:1px solid #555; color:#888; cursor:pointer; padding:5px 10px; border-radius:4px;">Reset to Default</button>
+        </div>
+    </div>
+
+<script>
+    // 1. DEFINE PATHS ONLY ONCE
+    const versionPaths = { 
+        "1.12.2": "Minecarft/@9293.html", 
+        "1.8": "Minecarft/OHN1122.html",
+        "1.20 (WASM)": "https://eaglercraftz.pages.dev/wasm/builds/0.1.0/"
+    };
+
+    // 2. TRACK CURRENT SELECTION
+    let currentLaunchPath = versionPaths["1.12.2"];
+
+   // 3. SINGLE ONLOAD FUNCTION
+window.onload = () => {
+    try {
+        // --- Load Username ---
+        const savedUser = localStorage.getItem('eaglerName') || 'Player';
+        const nameInput = document.getElementById('usernameInput');
+        if (nameInput) {
+            nameInput.value = savedUser;
+            if (typeof applyUsername === "function") applyUsername(savedUser);
+        }
+
+        // --- Load Theme ---
+        const savedTheme = localStorage.getItem('eaglerTheme') || 'default';
+        const themeSelect = document.getElementById('themeSelect');
+        if (themeSelect) {
+            themeSelect.value = savedTheme;
+            if (typeof applyTheme === "function") applyTheme(savedTheme);
+        }
+
+        // --- Load last selected version ---
+        const savedVer = localStorage.getItem('eaglerVer') || '1.8.8';
+        const versionSelect = document.getElementById('gameVersion');
+        if (versionSelect) {
+            versionSelect.value = savedVer;
+            if (typeof updateVersion === "function") updateVersion(savedVer);
+        }
+
+        // --- Load Custom Assets (Wallpaper & Skin) ---
+        const savedBg = localStorage.getItem('eaglerCustomBg');
+        if (savedBg && typeof applyBg === "function") {
+            applyBg(savedBg); 
+        }
+
+        const savedSkin = localStorage.getItem('eaglerSkin');
+        if (savedSkin && typeof applySkin === "function") {
+            applySkin(savedSkin);
+        }
+
+        console.log("Launcher state restored successfully.");
+    } catch (err) {
+        console.error("Initialization Error:", err);
+    }
+};
+
+    // 4. LAUNCH LOGIC
+    function launchGame() {
+        const gameWindow = window.open(currentLaunchPath, 'EaglerInstance', 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no');
+        if (!gameWindow) {
+            alert("Pop-up blocked! Please allow pop-ups to launch the game.");
+        }
+    }
+
+    function updateVersion(ver) {
+        currentLaunchPath = versionPaths[ver];
+        document.getElementById('versionBadge').innerText = ver;
+        localStorage.setItem('eaglerVer', ver);
+    }
+
+    // 5. NAVIGATION & SETTINGS
+    function showPage(pageId, element) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        element.classList.add('active');
+    }
+
+    function saveUsername(val) {
+        const name = val || 'Player';
+        applyUsername(name);
+        localStorage.setItem('eaglerName', name);
+    }
+
+    function applyUsername(name) {
+        document.getElementById('welcomeName').innerText = name;
+        document.getElementById('displayUser').innerText = name;
+    }
+
+    function saveTheme(theme) {
+        applyTheme(theme);
+        localStorage.setItem('eaglerTheme', theme);
+    }
+
+    function applyTheme(theme) {
+        const body = document.getElementById('mainBody');
+        body.className = ''; 
+        if (theme !== 'default') body.classList.add(theme);
+    }
+
+    // 6. ASSET HANDLING
+    function handleBgUpload(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            applyBg(e.target.result);
+            localStorage.setItem('eaglerCustomBg', e.target.result);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function handleSkinUpload(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            applySkin(e.target.result);
+            localStorage.setItem('eaglerSkin', e.target.result);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function applyBg(url) {
+        document.getElementById('bgOverlay').style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(18,18,18,1)), url(${url})`;
+    }
+
+    function applySkin(url) {
+        const preview = document.getElementById('skinPreview');
+        preview.style.backgroundImage = `url(${url})`;
+        preview.style.backgroundSize = "800%"; 
+        preview.style.backgroundPosition = "14.5% 15.5%"; 
+        preview.style.imageRendering = "pixelated";
+    }
+
+    function resetAssets() {
+        if(confirm("Reset skin and background?")) {
+            localStorage.removeItem('eaglerCustomBg');
+            localStorage.removeItem('eaglerSkin');
+            location.reload();
+        }
+    }
+
+    // 1. Add a variable at the top to store the game window state
+let gameWindow = null;
+
+// 2. Updated Launch Function
+function launchGame() {
+    // Open the window
+    gameWindow = window.open(currentLaunchPath, 'EaglerInstance', 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no');
+    
+    if (!gameWindow) {
+        alert("Pop-up blocked! Please allow pop-ups to launch the game.");
+        return;
+    }
+
+    // Immediately update the UI
+    updateStatus(true);
+
+    // Start checking if the window is closed
+    const statusTracker = setInterval(() => {
+        if (gameWindow.closed) {
+            updateStatus(false);
+            clearInterval(statusTracker); // Stop checking once it's closed
+        }
+    }, 1000); // Checks every 1 second
+}
+
+// 3. Helper function to swap the text and colors
+function updateStatus(isPlaying) {
+    const statusIndicator = document.getElementById('statusIndicator');
+    const playBtn = document.getElementById('playBtn');
+
+    if (isPlaying) {
+        statusIndicator.innerText = "● PLAYING GAME";
+        statusIndicator.style.color = "#ffcc00"; // Yellow/Gold color for "Playing"
+        playBtn.innerText = "RUNNING...";
+        playBtn.style.opacity = "0.5";
+        playBtn.style.pointerEvents = "none"; // Prevents opening 100 windows
+    } else {
+        statusIndicator.innerText = "● ONLINE";
+        statusIndicator.style.color = "var(--accent)";
+        playBtn.innerText = "PLAY";
+        playBtn.style.opacity = "1";
+        playBtn.style.pointerEvents = "auto";
+    }
+}
+
+// --- AFK LOGIC ---
+let isAfk = false;
+let afkTimer;
+const AFK_TIMEOUT = 5000; // 5 Seconds
+
+function resetAfkTimer() {
+    clearTimeout(afkTimer);
+    if (isAfk) {
+        isAfk = false;
+        console.log("User is active"); // Debugging
+        refreshStatusDisplay();
+    }
+    afkTimer = setTimeout(() => {
+        isAfk = true;
+        console.log("User is AFK"); // Debugging
+        refreshStatusDisplay();
+    }, AFK_TIMEOUT);
+}
+
+// Event listeners to detect activity
+window.addEventListener('mousemove', resetAfkTimer);
+window.addEventListener('keydown', resetAfkTimer);
+window.addEventListener('focus', () => { isAfk = false; refreshStatusDisplay(); });
+window.addEventListener('blur', () => { isAfk = true; refreshStatusDisplay(); });
+
+// Update the actual text on screen
+function refreshStatusDisplay() {
+    const statusIndicator = document.getElementById('statusIndicator');
+    if (!statusIndicator) return; // Prevents errors if ID is missing
+
+    if (gameWindow && !gameWindow.closed) {
+        statusIndicator.innerText = "● PLAYING GAME";
+        statusIndicator.style.color = "#ffcc00";
+    } else if (isAfk) {
+        statusIndicator.innerText = "● AFK / INACTIVE";
+        statusIndicator.style.color = "#888888";
+    } else {
+        statusIndicator.innerText = "● ONLINE";
+        statusIndicator.style.color = "var(--accent)";
+    }
+}
+
+function refreshStatusDisplay() {
+    const statusIndicator = document.getElementById('statusIndicator');
+    const selfStatus = document.getElementById('friendSelfStatus');
+    const selfName = document.getElementById('friendSelfName');
+    const selfAvatar = document.getElementById('friendSelfAvatar');
+    const playBtn = document.getElementById('playBtn');
+
+    // Sync Friend Card with your Settings
+    if(selfName) selfName.innerText = localStorage.getItem('eaglerName') || 'Player';
+    if(selfAvatar) selfAvatar.style.backgroundImage = `url(${localStorage.getItem('eaglerSkin')})`;
+    if(selfAvatar) selfAvatar.style.backgroundSize = "800%";
+    if(selfAvatar) selfAvatar.style.backgroundPosition = "14.5% 15.5%";
+
+    if (gameWindow && !gameWindow.closed) {
+        let txt = "● PLAYING GAME";
+        statusIndicator.innerText = txt;
+        statusIndicator.style.color = "#ffcc00";
+        if(selfStatus) { selfStatus.innerText = "Playing EaglerCraft"; selfStatus.style.color = "#ffcc00"; }
+        
+        playBtn.innerText = "RUNNING...";
+        playBtn.style.opacity = "0.5";
+        playBtn.style.pointerEvents = "none";
+    } else if (isAfk) {
+        let txt = "● AFK / INACTIVE";
+        statusIndicator.innerText = txt;
+        statusIndicator.style.color = "#888888";
+        if(selfStatus) { selfStatus.innerText = "AFK"; selfStatus.style.color = "#888"; }
+
+        playBtn.innerText = "PLAY";
+        playBtn.style.opacity = "1";
+        playBtn.style.pointerEvents = "auto";
+    } else {
+        let txt = "● ONLINE";
+        statusIndicator.innerText = txt;
+        statusIndicator.style.color = "var(--accent)";
+        if(selfStatus) { selfStatus.innerText = "Online"; selfStatus.style.color = "var(--accent)"; }
+
+        playBtn.innerText = "PLAY";
+        playBtn.style.opacity = "1";
+        playBtn.style.pointerEvents = "auto";
+    }
+}
+// Add this variable at the top of your script
+let totalPlaytime = parseInt(localStorage.getItem('eaglerPlaytime')) || 0;
+function launchGame() {
+    try {
+        // 1. Get the dropdown element
+        const versionSelect = document.getElementById('versionSelect');
+        if (!versionSelect) throw new Error("Could not find versionSelect dropdown");
+
+        // 2. Get the selected version name
+        const selectedVersion = versionSelect.value;
+        
+        // 3. Get the path from your versionPaths object
+        // Make sure versionPaths is defined at the top of your script!
+        const currentLaunchPath = versionPaths[selectedVersion];
+
+        if (!currentLaunchPath) {
+            alert("Error: Path for " + selectedVersion + " not found.");
+            return;
+        }
+
+        // 4. Open the window
+        // Use '_blank' for everything to avoid 'about:blank' bugs
+        gameWindow = window.open(currentLaunchPath, '_blank');
+        
+        if (!gameWindow) {
+            alert("Pop-up blocked! Please allow pop-ups for this site.");
+            return;
+        }
+
+        // 5. Start the Status & Timer
+        if (typeof refreshStatusDisplay === "function") refreshStatusDisplay();
+
+        const statusTracker = setInterval(() => {
+            if (gameWindow.closed) {
+                clearInterval(statusTracker);
+                if (typeof refreshStatusDisplay === "function") refreshStatusDisplay();
+            } else {
+                // Ensure totalPlaytime exists
+                if (typeof totalPlaytime !== 'undefined') {
+                    totalPlaytime++;
+                    localStorage.setItem('eaglerPlaytime', totalPlaytime);
+                    if (typeof updatePlaytimeDisplay === "function") updatePlaytimeDisplay();
+                }
+            }
+        }, 1000);
+
+    } catch (err) {
+        console.error(err);
+        alert("Launcher Error: " + err.message);
+    }
+}
+// Function to format seconds into Hours and Minutes
+function updatePlaytimeDisplay() {
+    const hours = Math.floor(totalPlaytime / 3600);
+    const minutes = Math.floor((totalPlaytime % 3600) / 60);
+    const display = document.getElementById('playtimeDisplay');
+    
+    if (display) {
+        if (hours > 0) {
+            display.innerText = `${hours}h ${minutes}m played`;
+        } else {
+            display.innerText = `${minutes}m played`;
+        }
+    }
+}
+
+// Call this in window.onload so it shows up immediately when opening the launcher
+// window.onload = () => { ... updatePlaytimeDisplay(); ... }
+
+function cloakLauncher() {
+    // 1. Create the new tab
+    const win = window.open('about:blank', '_blank');
+    if (!win) {
+        alert("Pop-up blocked! Please allow pop-ups for the switcher to work.");
+        return;
+    }
+
+    // 2. Get your current launcher's full HTML
+    const currentHTML = document.documentElement.outerHTML;
+
+    // 3. Write it into the new about:blank page
+    win.document.open();
+    win.document.write(currentHTML);
+    win.document.close();
+
+    // 4. Set the title of the new tab to something boring
+    win.document.title = "Classes"; 
+
+    // 5. Close the original tab (Optional - some browsers block self-closing)
+    window.location.replace("https://classroom.google.com"); 
+}
+
+</script>
+    
+</body>
+</html>
